@@ -1,13 +1,16 @@
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FileText, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface DocumentDisplayPanelProps {
   documentName: string | null;
   content: string | null;
   isLoading: boolean;
   error?: string | null;
+  className?: string;
 }
 
 export function DocumentDisplayPanel({
@@ -15,17 +18,28 @@ export function DocumentDisplayPanel({
   content,
   isLoading,
   error = null,
+  className,
 }: DocumentDisplayPanelProps) {
   return (
-    <Card className="flex-grow flex flex-col shadow-lg rounded-xl overflow-hidden h-[calc(100vh-20rem)] md:h-auto">
+    <Card className={cn("flex flex-col shadow-md rounded-xl overflow-hidden h-full", className)}>
       <CardHeader className="bg-card-foreground/5 border-b">
         <CardTitle className="flex items-center text-lg font-semibold text-primary">
           <FileText className="mr-2 h-5 w-5" />
           Document Viewer
         </CardTitle>
-        {documentName && !isLoading && (
+        {documentName && !isLoading && !error && (
           <CardDescription className="text-sm text-muted-foreground pt-1">
             Displaying summary for: <span className="font-medium text-foreground">{documentName}</span>
+          </CardDescription>
+        )}
+         {isLoading && (
+          <CardDescription className="text-sm text-muted-foreground pt-1">
+            Loading document...
+          </CardDescription>
+        )}
+        {error && !isLoading && (
+           <CardDescription className="text-sm text-destructive pt-1">
+            Failed to load document.
           </CardDescription>
         )}
       </CardHeader>

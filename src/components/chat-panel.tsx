@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from 'react';
@@ -24,6 +25,7 @@ interface ChatPanelProps {
   isLoadingResponse: boolean;
   isDocumentLoaded: boolean;
   chatError?: string | null;
+  className?: string;
 }
 
 export function ChatPanel({
@@ -33,6 +35,7 @@ export function ChatPanel({
   isLoadingResponse,
   isDocumentLoaded,
   chatError = null,
+  className,
 }: ChatPanelProps) {
   const [inputValue, setInputValue] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -44,7 +47,7 @@ export function ChatPanel({
         behavior: 'smooth',
       });
     }
-  }, [messages]);
+  }, [messages, isLoadingResponse]); // Added isLoadingResponse to scroll when loader appears/disappears
 
   const handleSendMessage = async () => {
     if (inputValue.trim() && !isLoadingResponse && isDocumentLoaded) {
@@ -66,8 +69,8 @@ export function ChatPanel({
   };
 
   return (
-    <Card className="flex flex-col shadow-lg rounded-xl overflow-hidden h-[calc(100vh-12rem)] md:h-auto">
-      <CardHeader className="bg-card-foreground/5 border-b flex flex-row items-center justify-between">
+    <Card className={cn("flex flex-col shadow-md rounded-xl overflow-hidden h-full", className)}>
+      <CardHeader className="bg-card-foreground/5 border-b flex flex-row items-center justify-between py-4">
         <CardTitle className="flex items-center text-lg font-semibold text-primary">
           <Bot className="mr-2 h-5 w-5" />
           Chat Assistant
@@ -76,27 +79,27 @@ export function ChatPanel({
           variant="ghost"
           size="icon"
           onClick={onClearSession}
-          disabled={!isDocumentLoaded && messages.length === 0}
+          disabled={!isDocumentLoaded && messages.length === 0 && !chatError}
           aria-label="Clear chat session"
-          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
         >
-          <Trash2 className="h-5 w-5" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent className="p-0 flex-grow overflow-hidden">
         <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-          {messages.length === 0 && !isDocumentLoaded && (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <MessageSquareWarning className="h-16 w-16 mb-4" />
-              <p className="text-lg font-semibold">Upload a document</p>
-              <p className="text-sm text-center">Once a document is summarized, you can start chatting here.</p>
+          {messages.length === 0 && !isDocumentLoaded && !chatError && (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4">
+              <MessageSquareWarning className="h-12 w-12 mb-3 text-primary/70" />
+              <p className="text-md font-semibold">Upload a document</p>
+              <p className="text-xs text-center text-muted-foreground/80 mt-1">Once a document is summarized, you can start chatting here.</p>
             </div>
           )}
-          {messages.length === 0 && isDocumentLoaded && (
-             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <MessageSquareWarning className="h-16 w-16 mb-4" />
-              <p className="text-lg font-semibold">Ask a question</p>
-              <p className="text-sm text-center">Your document summary is ready. Start the conversation!</p>
+          {messages.length === 0 && isDocumentLoaded && !chatError && (
+             <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4">
+              <MessageSquareWarning className="h-12 w-12 mb-3 text-primary/70" />
+              <p className="text-md font-semibold">Ask a question</p>
+              <p className="text-xs text-center text-muted-foreground/80 mt-1">Your document summary is ready. Start the conversation!</p>
             </div>
           )}
           <div className="space-y-6">
@@ -104,20 +107,20 @@ export function ChatPanel({
               <div
                 key={msg.id}
                 className={cn(
-                  'flex items-end gap-3',
+                  'flex items-end gap-2.5', // Slightly reduced gap
                   msg.sender === 'user' ? 'justify-end' : 'justify-start'
                 )}
               >
                 {msg.sender === 'ai' && (
-                  <Avatar className="h-8 w-8 border-2 border-primary/50">
-                    <AvatarFallback>
-                      <Bot className="h-5 w-5 text-primary" />
+                  <Avatar className="h-7 w-7 border border-primary/30">
+                    <AvatarFallback className="bg-primary/10">
+                      <Bot className="h-4 w-4 text-primary" />
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={cn(
-                    'max-w-[70%] rounded-xl px-4 py-3 text-sm shadow',
+                    'max-w-[75%] rounded-lg px-3.5 py-2.5 text-sm shadow-sm', // Adjusted padding & shadow
                     msg.sender === 'user'
                       ? 'bg-primary text-primary-foreground rounded-br-none'
                       : 'bg-card text-card-foreground border border-border rounded-bl-none'
@@ -125,47 +128,47 @@ export function ChatPanel({
                 >
                   <p className="whitespace-pre-wrap">{msg.text}</p>
                   <p className={cn(
-                      "text-xs mt-1",
-                      msg.sender === 'user' ? 'text-primary-foreground/70 text-right' : 'text-muted-foreground/70 text-left'
+                      "text-xs mt-1.5 opacity-70", // Adjusted opacity
+                      msg.sender === 'user' ? 'text-right' : 'text-left'
                     )}>
                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
                 {msg.sender === 'user' && (
-                  <Avatar className="h-8 w-8 border-2 border-accent/50">
-                     <AvatarFallback>
-                      <UserCircle className="h-5 w-5 text-accent" />
+                  <Avatar className="h-7 w-7 border border-accent/30">
+                     <AvatarFallback className="bg-accent/10">
+                      <UserCircle className="h-4 w-4 text-accent" />
                     </AvatarFallback>
                   </Avatar>
                 )}
               </div>
             ))}
             {isLoadingResponse && (
-              <div className="flex items-end gap-3 justify-start">
-                <Avatar className="h-8 w-8 border-2 border-primary/50">
-                  <AvatarFallback>
-                    <Bot className="h-5 w-5 text-primary" />
+              <div className="flex items-end gap-2.5 justify-start">
+                <Avatar className="h-7 w-7 border border-primary/30">
+                  <AvatarFallback className="bg-primary/10">
+                    <Bot className="h-4 w-4 text-primary" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="max-w-[70%] rounded-xl px-4 py-3 text-sm shadow bg-card text-card-foreground border border-border rounded-bl-none">
+                <div className="max-w-[70%] rounded-lg px-3.5 py-2.5 text-sm shadow-sm bg-card text-card-foreground border border-border rounded-bl-none">
                   <div className="flex items-center">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    <span>Thinking...</span>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
+                    <span className="text-muted-foreground">Thinking...</span>
                   </div>
                 </div>
               </div>
             )}
              {chatError && (
-                <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive border border-destructive/20">
+                <div className="flex items-center gap-2 p-3 my-2 rounded-md bg-destructive/10 text-destructive border border-destructive/30">
                   <AlertCircle className="h-5 w-5 shrink-0" />
-                  <p className="text-sm">{chatError}</p>
+                  <p className="text-sm font-medium">{chatError}</p>
                 </div>
               )}
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="p-4 border-t bg-card-foreground/5">
-        <div className="flex w-full items-center gap-3">
+      <CardFooter className="p-3 border-t bg-card-foreground/5">
+        <div className="flex w-full items-center gap-2.5">
           <Input
             type="text"
             placeholder={isDocumentLoaded ? "Ask about the document..." : "Upload a document first"}
@@ -173,17 +176,17 @@ export function ChatPanel({
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             disabled={!isDocumentLoaded || isLoadingResponse}
-            className="flex-grow bg-background focus:ring-primary/50 focus:ring-2"
+            className="flex-grow bg-background focus:ring-primary/50 focus:ring-offset-0 focus:ring-1 h-9 text-sm"
             aria-label="Chat input"
           />
           <Button
             type="submit"
             onClick={handleSendMessage}
             disabled={!isDocumentLoaded || isLoadingResponse || !inputValue.trim()}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground h-9 px-3.5"
             aria-label="Send message"
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-4 w-4" />
           </Button>
         </div>
       </CardFooter>
