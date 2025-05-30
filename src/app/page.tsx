@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect }_ from 'react';
+import { useState, useEffect } from 'react';
 import type { ChangeEvent } from 'react'; // Added for file input event type
 import { AppHeader } from '@/components/app-header';
 import { FileUploadButton } from '@/components/file-upload-button';
