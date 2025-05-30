@@ -31,11 +31,13 @@ export default function AIDocumentNavigatorPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // IMPORTANT: pdf.js worker setup for client-side parsing.
-    // You'll need to copy 'node_modules/pdfjs-dist/build/pdf.worker.mjs'
-    // to your '/public' directory for this to work.
+    // pdf.js worker setup.
+    // Using a CDN as a workaround for potential local serving issues.
+    // The installed pdfjs-dist version is 4.4.168.
+    // PREFERRED: Copy 'node_modules/pdfjs-dist/build/pdf.worker.mjs' to '/public'
+    // and use: pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
     if (typeof window !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.mjs`;
     }
   }, []);
 
