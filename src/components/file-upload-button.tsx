@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from 'react';
@@ -53,7 +54,7 @@ export function FileUploadButton({
           <UploadCloud className="mr-2 h-5 w-5 text-primary group-hover:animate-bounce" />
         )}
         <span className="text-foreground group-hover:text-primary">
-          {isLoading ? 'Processing...' : 'Select PDF or DOCX'}
+          {isLoading ? 'Processing Info...' : 'Select PDF or DOCX'}
         </span>
       </Button>
       <input
@@ -66,7 +67,7 @@ export function FileUploadButton({
         aria-labelledby="file-upload-button"
       />
       <p className="text-xs text-muted-foreground mt-1">
-        Your document will be summarized. Chat will be based on this summary.
+        Basic information (name, type) about your document will be processed by AI. Chat will be based on this information. Full content parsing is not implemented.
       </p>
     </div>
   );

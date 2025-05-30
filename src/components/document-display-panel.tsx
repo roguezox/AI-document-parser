@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, AlertCircle } from 'lucide-react';
+import { FileText, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DocumentDisplayPanelProps {
@@ -24,23 +24,28 @@ export function DocumentDisplayPanel({
     <Card className={cn("flex flex-col shadow-md rounded-xl overflow-hidden h-full", className)}>
       <CardHeader className="bg-card-foreground/5 border-b">
         <CardTitle className="flex items-center text-lg font-semibold text-primary">
-          <FileText className="mr-2 h-5 w-5" />
-          Document Viewer
+          <Info className="mr-2 h-5 w-5" /> {/* Changed icon to Info for clarity */}
+          File Information Overview
         </CardTitle>
         {documentName && !isLoading && !error && (
           <CardDescription className="text-sm text-muted-foreground pt-1">
-            Displaying summary for: <span className="font-medium text-foreground">{documentName}</span>
+            Displaying AI-generated overview based on information for: <span className="font-medium text-foreground">{documentName}</span>. Full content is not parsed.
           </CardDescription>
         )}
          {isLoading && (
           <CardDescription className="text-sm text-muted-foreground pt-1">
-            Loading document...
+            Processing document information...
           </CardDescription>
         )}
         {error && !isLoading && (
            <CardDescription className="text-sm text-destructive pt-1">
-            Failed to load document.
+            Failed to process document information.
           </CardDescription>
+        )}
+         {!documentName && !isLoading && !error && (
+            <CardDescription className="text-sm text-muted-foreground pt-1">
+              Upload a document to see an AI-generated overview of its information.
+            </CardDescription>
         )}
       </CardHeader>
       <CardContent className="p-0 flex-grow overflow-hidden">
@@ -55,7 +60,7 @@ export function DocumentDisplayPanel({
           ) : error ? (
             <div className="flex flex-col items-center justify-center h-full text-destructive">
               <AlertCircle className="h-12 w-12 mb-4" />
-              <p className="text-lg font-semibold">Error Summarizing Document</p>
+              <p className="text-lg font-semibold">Error Processing File Info</p>
               <p className="text-sm text-center">{error}</p>
             </div>
           ) : content ? (
@@ -65,8 +70,8 @@ export function DocumentDisplayPanel({
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <FileText className="h-16 w-16 mb-4" />
-              <p className="text-lg font-semibold">No document loaded</p>
-              <p className="text-sm text-center">Upload a PDF or DOCX to see its summary here.</p>
+              <p className="text-lg font-semibold">No document information loaded</p>
+              <p className="text-sm text-center">Upload a PDF or DOCX to see an overview here.</p>
             </div>
           )}
         </ScrollArea>
