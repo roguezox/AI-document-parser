@@ -185,7 +185,7 @@ export default function AIDocumentNavigatorPage() {
     });
   };
   
-  return (
+  const pageContent = (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <AppHeader />
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
@@ -193,7 +193,7 @@ export default function AIDocumentNavigatorPage() {
           <div className="flex flex-col gap-6 min-h-0"> {/* Added min-h-0 for flex child */}
             <FileUploadButton onFileSelect={handleFileSelect} isLoading={isLoadingDocument} />
             <DocumentDisplayPanel
-              className="flex-grow min-h-0" {/* Added min-h-0 for flex child */}
+              className="flex-grow min-h-0" /* Added min-h-0 for flex child */
               documentName={documentName}
               content={extractedText} // Display the full extracted text
               isLoading={isLoadingDocument}
@@ -202,7 +202,7 @@ export default function AIDocumentNavigatorPage() {
           </div>
           <div className="flex flex-col min-h-0"> {/* Added min-h-0 for flex child */}
             <ChatPanel
-              className="flex-grow min-h-0" {/* Added min-h-0 for flex child */}
+              className="flex-grow min-h-0" /* Added min-h-0 for flex child */
               messages={chatMessages}
               onSendMessage={handleSendMessage}
               onClearSession={handleClearSession}
@@ -215,4 +215,6 @@ export default function AIDocumentNavigatorPage() {
       </main>
     </div>
   );
+
+  return pageContent;
 }
