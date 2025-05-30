@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import type { ChangeEvent } from 'react'; 
+import type { ChangeEvent } from 'react';
 import { AppHeader } from '@/components/app-header';
 import { FileUploadButton } from '@/components/file-upload-button';
 import { DocumentDisplayPanel } from '@/components/document-display-panel';
@@ -10,7 +10,7 @@ import { ChatPanel, type ChatMessage } from '@/components/chat-panel';
 import { summarizeDocument, type SummarizeDocumentInput } from '@/ai/flows/summarize-document';
 import { chatWithDocument, type ChatWithDocumentInput } from '@/ai/flows/chat-with-document';
 import { useToast } from "@/hooks/use-toast";
-import { v4 as uuidv4 } from 'uuid'; 
+import { v4 as uuidv4 } from 'uuid';
 
 // Import parsing libraries
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
@@ -31,13 +31,15 @@ export default function AIDocumentNavigatorPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // pdf.js worker setup.
-    // Using a CDN as a workaround for potential local serving issues.
-    // The installed pdfjs-dist version is 4.4.168.
-    // PREFERRED: Copy 'node_modules/pdfjs-dist/build/pdf.worker.mjs' to '/public'
-    // and use: pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
     if (typeof window !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.mjs`;
+      // Using a CDN for the worker to try and resolve loading issues.
+      // The installed pdfjs-dist version in package.json is "^4.4.168".
+      // NPM resolved this to "4.10.38" (as indicated by the error "API version '4.10.38'").
+      // Therefore, the worker version must match "4.10.38".
+      // A more stable long-term solution is to ensure the local worker file from 
+      // 'node_modules/pdfjs-dist/build/pdf.worker.mjs' is copied to the '/public' folder
+      // and then use: pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.mjs`;
     }
   }, []);
 
@@ -187,20 +189,20 @@ export default function AIDocumentNavigatorPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <AppHeader />
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow md:max-h-[calc(100vh-8rem-2rem)]">
-          <div className="flex flex-col gap-6 min-h-0"> 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow md:max-h-[calc(100vh-8rem-2rem)]"> {/* Adjusted max-height */}
+          <div className="flex flex-col gap-6 min-h-0"> {/* Added min-h-0 for flex child */}
             <FileUploadButton onFileSelect={handleFileSelect} isLoading={isLoadingDocument} />
             <DocumentDisplayPanel
-              className="flex-grow min-h-0" 
+              className="flex-grow min-h-0" {/* Added min-h-0 for flex child */}
               documentName={documentName}
               content={extractedText} // Display the full extracted text
               isLoading={isLoadingDocument}
               error={documentError}
             />
           </div>
-          <div className="flex flex-col min-h-0"> 
+          <div className="flex flex-col min-h-0"> {/* Added min-h-0 for flex child */}
             <ChatPanel
-              className="flex-grow min-h-0" 
+              className="flex-grow min-h-0" {/* Added min-h-0 for flex child */}
               messages={chatMessages}
               onSendMessage={handleSendMessage}
               onClearSession={handleClearSession}
