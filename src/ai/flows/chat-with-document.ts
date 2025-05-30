@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview A document Q&A agent.
+ * @fileOverview An agent that answers questions based on a provided summary or information about a document.
  *
  * - chatWithDocument - A function that handles the document Q&A process.
  * - ChatWithDocumentInput - The input type for the chatWithDocument function.
@@ -15,13 +15,13 @@ import {z} from 'genkit';
 const ChatWithDocumentInputSchema = z.object({
   documentContent: z
     .string()
-    .describe('The content of the document to ask questions about.'),
-  userQuestion: z.string().describe('The question from the user about the document.'),
+    .describe('The summary or information about the document to ask questions about.'),
+  userQuestion: z.string().describe('The question from the user about the document information.'),
 });
 export type ChatWithDocumentInput = z.infer<typeof ChatWithDocumentInputSchema>;
 
 const ChatWithDocumentOutputSchema = z.object({
-  answer: z.string().describe('The answer to the user question about the document.'),
+  answer: z.string().describe('The answer to the user question, based on the provided document summary/information.'),
 });
 export type ChatWithDocumentOutput = z.infer<typeof ChatWithDocumentOutputSchema>;
 
@@ -33,13 +33,15 @@ const prompt = ai.definePrompt({
   name: 'chatWithDocumentPrompt',
   input: {schema: ChatWithDocumentInputSchema},
   output: {schema: ChatWithDocumentOutputSchema},
-  prompt: `You are a helpful AI assistant that answers questions about documents.
+  prompt: `You are a helpful AI assistant. You have been provided with a summary or some information about a document (not the full content). Use this information to answer the user's questions.
 
-  Here is the content of the document: {{{documentContent}}}
+  Document Summary/Information:
+  {{{documentContent}}}
 
-  Here is the user's question: {{{userQuestion}}}
+  User's Question:
+  {{{userQuestion}}}
 
-  Please provide a concise and informative answer to the user's question, referencing the document content where appropriate.`,
+  Please provide a concise and informative answer to the user's question, based *only* on the provided document summary/information. If the summary doesn't contain the answer, state that the information is not available in the provided summary.`,
 });
 
 const chatWithDocumentFlow = ai.defineFlow(

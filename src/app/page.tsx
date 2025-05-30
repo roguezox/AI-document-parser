@@ -38,28 +38,30 @@ export default function AIDocumentNavigatorPage() {
     setChatError(null);
 
     try {
-      const pseudoContent = `The user has uploaded a document titled '${file.name}'. It is of type '${file.type || 'unknown'}'. This is placeholder content representing the actual file content which would be extracted in a full implementation. For now, summarize this description.`;
+      // Simulate content processing by using file metadata for AI interaction.
+      // In a full application, this would involve actual file parsing on a server.
+      const fileInformationContent = `The user has uploaded a document named "${file.name}" of type "${file.type || 'unknown'}". Please provide a brief acknowledgment based on this file information. Note: The actual file content is not processed in this prototype.`;
       
-      const summaryInput: SummarizeDocumentInput = { documentContent: pseudoContent };
+      const summaryInput: SummarizeDocumentInput = { documentContent: fileInformationContent };
       const summaryResponse = await summarizeDocument(summaryInput);
       
       if (summaryResponse.summary) {
         setDocumentSummary(summaryResponse.summary);
-        setDocumentContentForAI(summaryResponse.summary); 
+        setDocumentContentForAI(summaryResponse.summary); // This is the "summary" based on file info
         toast({
-          title: "Document Summarized",
-          description: `Summary for "${file.name}" is ready.`,
+          title: "Document Info Processed",
+          description: `File "${file.name}" information is ready for chat.`,
         });
       } else {
-        throw new Error("Failed to generate document summary.");
+        throw new Error("Failed to generate acknowledgment for the document.");
       }
     } catch (error) {
-      console.error("Error summarizing document:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during summarization.";
+      console.error("Error processing document information:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during processing.";
       setDocumentError(errorMessage);
       setDocumentName(null); 
       toast({
-        title: "Summarization Error",
+        title: "Processing Error",
         description: errorMessage,
         variant: "destructive",
       });
@@ -72,7 +74,7 @@ export default function AIDocumentNavigatorPage() {
     if (!documentContentForAI) {
       toast({
         title: "Error",
-        description: "No document loaded to chat with.",
+        description: "No document information loaded to chat about.",
         variant: "destructive",
       });
       return;
@@ -90,7 +92,7 @@ export default function AIDocumentNavigatorPage() {
 
     try {
       const chatInput: ChatWithDocumentInput = {
-        documentContent: documentContentForAI,
+        documentContent: documentContentForAI, // This is the AI-generated summary/acknowledgment of file info
         userQuestion: messageText,
       };
       const chatResponse = await chatWithDocument(chatInput);
@@ -107,7 +109,7 @@ export default function AIDocumentNavigatorPage() {
         throw new Error("AI did not provide an answer.");
       }
     } catch (error) {
-      console.error("Error chatting with document:", error);
+      console.error("Error chatting about document information:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during chat.";
       setChatError(errorMessage);
       toast({
@@ -131,7 +133,7 @@ export default function AIDocumentNavigatorPage() {
     setChatError(null);
     toast({
       title: "Session Cleared",
-      description: "Document and chat history have been cleared.",
+      description: "Document information and chat history have been cleared.",
     });
   };
   
@@ -153,7 +155,7 @@ export default function AIDocumentNavigatorPage() {
             <DocumentDisplayPanel
               className="flex-grow min-h-0" // Panel grows, its internal ScrollArea handles overflow
               documentName={documentName}
-              content={documentSummary}
+              content={documentSummary} // This will display the AI-generated acknowledgment/summary of file info
               isLoading={isLoadingDocument}
               error={documentError}
             />
