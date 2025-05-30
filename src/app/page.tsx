@@ -32,14 +32,25 @@ export default function AIDocumentNavigatorPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Using a CDN for the worker to try and resolve loading issues.
-      // The installed pdfjs-dist version in package.json is "^4.4.168".
-      // NPM resolved this to "4.10.38" (as indicated by the error "API version '4.10.38'").
-      // Therefore, the worker version must match "4.10.38".
-      // A more stable long-term solution is to ensure the local worker file from 
-      // 'node_modules/pdfjs-dist/build/pdf.worker.mjs' is copied to the '/public' folder
-      // and then use: pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.mjs`;
+      // --- PDF.js Worker Configuration ---
+      // pdf.js requires a worker script to process PDFs off the main thread.
+      // Option 1: Use a CDN (Current approach for broader compatibility, e.g., local dev)
+      // IMPORTANT: The version in the CDN URL (e.g., /4.4.168/) MUST MATCH the version of the
+      // pdfjs-dist library that gets installed in your environment (e.g., Vercel).
+      // Your package.json specifies "pdfjs-dist": "^4.4.168".
+      // If Vercel (or your local env) installs exactly 4.4.168, this worker version is correct.
+      // If it installs a newer patch (e.g., 4.10.38, as indicated by a previous local error),
+      // then this CDN URL would need to be updated to that specific version (e.g., .../pdf.js/4.10.38/...).
+      // Setting to 4.4.168 as an attempt to align with Vercel potentially using the base of the specified range.
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.mjs`;
+
+      // Option 2: Local worker (STRONGLY RECOMMENDED FOR VERCEL & PRODUCTION for version consistency)
+      // 1. Create a 'public' folder in your project root if it doesn't exist.
+      // 2. Manually copy 'node_modules/pdfjs-dist/build/pdf.worker.mjs' to your '/public' folder.
+      //    Ensure this is done as part of your build/deployment process if versions change.
+      // 3. Uncomment the line below and comment out the CDN line above:
+      // pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+      // This method is more robust as it ensures the worker version always matches your installed library version.
     }
   }, []);
 
