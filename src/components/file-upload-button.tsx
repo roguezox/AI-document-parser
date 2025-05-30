@@ -16,7 +16,7 @@ interface FileUploadButtonProps {
 export function FileUploadButton({
   onFileSelect,
   isLoading,
-  acceptedFileTypes = ".pdf,.docx",
+  acceptedFileTypes = ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document", // More specific MIME types
 }: FileUploadButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -25,7 +25,6 @@ export function FileUploadButton({
     if (file) {
       onFileSelect(file);
     }
-    // Reset file input to allow uploading the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -54,7 +53,7 @@ export function FileUploadButton({
           <UploadCloud className="mr-2 h-5 w-5 text-primary group-hover:animate-bounce" />
         )}
         <span className="text-foreground group-hover:text-primary">
-          {isLoading ? 'Processing Info...' : 'Select PDF or DOCX'}
+          {isLoading ? 'Processing Document...' : 'Select PDF or DOCX'}
         </span>
       </Button>
       <input
@@ -67,7 +66,7 @@ export function FileUploadButton({
         aria-labelledby="file-upload-button"
       />
       <p className="text-xs text-muted-foreground mt-1">
-        Basic information (name, type) about your document will be processed by AI. Chat will be based on this information. Full content parsing is not implemented.
+        The content of your document will be extracted and summarized by AI for chat.
       </p>
     </div>
   );

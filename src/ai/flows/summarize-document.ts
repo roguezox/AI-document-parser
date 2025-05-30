@@ -2,9 +2,9 @@
 'use server';
 
 /**
- * @fileOverview Generates an acknowledgment or brief overview based on document information (like name and type).
+ * @fileOverview Generates a summary based on the provided document content.
  *
- * - summarizeDocument - A function that handles processing document information.
+ * - summarizeDocument - A function that handles processing and summarizing document content.
  * - SummarizeDocumentInput - The input type for the summarizeDocument function.
  * - SummarizeDocumentOutput - The return type for the summarizeDocument function.
  */
@@ -15,26 +15,35 @@ import {z} from 'genkit';
 const SummarizeDocumentInputSchema = z.object({
   documentContent: z
     .string()
-    .describe('Information about the document (e.g., name, type) to be acknowledged or briefly overviewed.'),
+    .describe('The actual text content of the document to be summarized.'),
 });
 export type SummarizeDocumentInput = z.infer<typeof SummarizeDocumentInputSchema>;
 
 const SummarizeDocumentOutputSchema = z.object({
-  summary: z.string().describe('An acknowledgment or brief overview based on the document information.'),
+  summary: z.string().describe('A concise summary of the provided document content.'),
 });
 export type SummarizeDocumentOutput = z.infer<typeof SummarizeDocumentOutputSchema>;
 
 export async function summarizeDocument(input: SummarizeDocumentInput): Promise<SummarizeDocumentOutput> {
-  return summarizeDocumentFlow(input);
+  // Basic check for very long content to avoid overwhelming the model or exceeding limits.
+  // A more robust solution might involve chunking or more sophisticated truncation.
+  const MAX_CONTENT_LENGTH = 50000; // Example limit, adjust as needed
+  let contentToSummarize = input.documentContent;
+  if (contentToSummarize.length > MAX_CONTENT_LENGTH) {
+    console.warn(`Document content length (${contentToSummarize.length}) exceeds max (${MAX_CONTENT_LENGTH}). Truncating.`);
+    contentToSummarize = contentToSummarize.substring(0, MAX_CONTENT_LENGTH) + "\n\n[Content truncated due to length]";
+  }
+
+  return summarizeDocumentFlow({ documentContent: contentToSummarize });
 }
 
 const summarizeDocumentPrompt = ai.definePrompt({
   name: 'summarizeDocumentPrompt',
   input: {schema: SummarizeDocumentInputSchema},
   output: {schema: SummarizeDocumentOutputSchema},
-  prompt: `You have been given information about a document. Based on the following details, provide a concise acknowledgment or a very brief overview. This is for a system where actual file content parsing is not yet implemented.
+  prompt: `You have been provided with the content of a document. Please generate a concise and informative summary of this content. Focus on the key points and main ideas.
 
-Document Information:
+Document Content:
 {{{documentContent}}}`,
 });
 
