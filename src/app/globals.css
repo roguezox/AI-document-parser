@@ -44,7 +44,7 @@ body {
     --chart-5: 30 80% 65%;  /* Orangey-Yellow */
     --radius: 0.5rem;
 
-    /* Sidebar variables */
+    /* Sidebar variables for light theme */
     --sidebar-background: 220 18% 94%; 
     --sidebar-foreground: 220 10% 30%; 
     --sidebar-primary: 214 70% 50%; 
@@ -56,56 +56,77 @@ body {
   }
 
   .dark {
-    --background: 220 15% 18%; /* Dark Slate Blue */
-    --foreground: 220 10% 80%; /* Light Grayish Blue Text */
+    --background: 220 15% 12%;        /* Start color for body gradient */
+    --background-end: 220 15% 8%;    /* End color for body gradient */
+    --foreground: 220 10% 90%;        /* Brighter foreground for dark bg */
 
-    --card: 220 15% 22%; /* Slightly Lighter Dark Slate Blue */
-    --card-foreground: 220 10% 80%;
+    --card: 220 15% 18%;              /* Solid dark card background */
+    --card-foreground: 220 10% 85%;   /* Brighter card foreground */
 
-    --popover: 220 15% 22%;
-    --popover-foreground: 220 10% 80%;
+    --popover: 220 15% 17%;           /* Dark popover */
+    --popover-foreground: 220 10% 85%;
 
-    --primary: 214 75% 60%; /* Brighter Blue for Dark Mode */
-    --primary-foreground: 220 10% 15%; /* Darker text on primary for contrast */
+    --primary: 214 80% 65%;           /* Brighter primary for dark mode */
+    --primary-foreground: 220 10% 10%; /* Darker text on bright primary */
 
-    --secondary: 220 15% 25%; 
-    --secondary-foreground: 214 75% 60%;
+    --secondary: 220 15% 28%;         /* Darker secondary */
+    --secondary-foreground: 214 80% 65%; /* Brighter secondary text */
 
-    --muted: 220 15% 28%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 220 15% 22%;             /* Darker muted */
+    --muted-foreground: 220 10% 65%;  /* Lighter muted text */
 
-    --accent: 24 85% 60%; /* Brighter Orange/Amber */
-    --accent-foreground: 220 10% 15%; /* Darker text on accent */
+    --accent: 24 90% 60%;             /* Brighter accent */
+    --accent-foreground: 220 10% 10%; /* Darker text on bright accent */
 
-    --destructive: 0 62.8% 50.6%;
+    --destructive: 0 70% 55%;         /* Adjusted destructive */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 30%;
-    --input: 220 15% 25%;
-    --ring: 214 75% 60%;
+    --border: 220 15% 35%;            /* More visible border */
+    --input: 220 15% 25%;             /* Dark input background */
+    --ring: 214 80% 65%;              /* Ring to match brighter primary */
 
-    --chart-1: 214 75% 60%; /* Primary */
-    --chart-2: 24 85% 60%;  /* Accent */
-    --chart-3: 190 65% 50%; /* Tealish */
-    --chart-4: 280 65% 65%; /* Purpleish */
-    --chart-5: 30 85% 70%;  /* Orangey-Yellow */
+    --chart-1: 214 75% 60%;
+    --chart-2: 24 85% 60%;
+    --chart-3: 190 65% 50%;
+    --chart-4: 280 65% 65%;
+    --chart-5: 30 85% 70%;
     
-    --sidebar-background: 220 12% 15%;
-    --sidebar-foreground: 220 10% 75%;
-    --sidebar-primary: 214 75% 60%;
-    --sidebar-primary-foreground: 220 10% 15%;
-    --sidebar-accent: 24 85% 60%;
-    --sidebar-accent-foreground: 220 10% 15%;
-    --sidebar-border: 220 15% 28%;
-    --sidebar-ring: 214 75% 60%;
+    /* Sidebar variables for dark theme with gradient */
+    --sidebar-background: 220 15% 15%;     /* Start color for sidebar gradient */
+    --sidebar-background-end: 220 15% 11%; /* End color for sidebar gradient */
+    --sidebar-foreground: 220 10% 80%;
+    --sidebar-primary: 214 80% 65%;
+    --sidebar-primary-foreground: 220 10% 10%;
+    --sidebar-accent: 24 90% 60%;
+    --sidebar-accent-foreground: 220 10% 10%;
+    --sidebar-border: 220 15% 30%;
+    --sidebar-ring: 214 80% 65%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground; /* Default (light theme) application */
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
+
+  .dark body {
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background-end)) 100%);
+    color: hsl(var(--foreground));
+  }
+
+  /* Sidebar gradient in dark mode */
+  .dark div[data-sidebar="sidebar"] {
+    background: linear-gradient(135deg, hsl(var(--sidebar-background)) 0%, hsl(var(--sidebar-background-end)) 100%);
+    border-color: hsl(var(--sidebar-border)); /* Ensure border matches */
+  }
+  
+  .dark .group[data-variant="floating"] div[data-sidebar="sidebar"],
+  .dark .group[data-variant="inset"] div[data-sidebar="sidebar"] {
+     background: linear-gradient(135deg, hsl(var(--sidebar-background)) 0%, hsl(var(--sidebar-background-end)) 100%);
+     border-color: hsl(var(--sidebar-border));
+  }
+
 }
