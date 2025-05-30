@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🧠 Document Insight
 
 **Document Insight** is an AI-powered web application that allows you to upload PDF or DOCX files, extract their content, generate a summary using AI, and ask questions based on the summarized content — all in a beautiful, dark-themed interface.
@@ -85,3 +86,6 @@ npm install
 
 # Run the development server
 npm run dev
+=======
+# Document Parser
+>>>>>>> acf8955 (remove the firebase studio favicon)

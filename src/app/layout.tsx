@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import { Geist, Geist_Mono } from 'next/font/google'; // Corrected import for Geist (was GeistSans)
 import './globals.css';
@@ -16,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'AI Document Navigator',
   description: 'Upload PDF or DOCX and chat with it using LLMs',
+  icons: {
+    icon: 'data:,', // Sets a blank favicon
+  },
 };
 
 export default function RootLayout({
