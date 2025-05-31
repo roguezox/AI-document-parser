@@ -33,24 +33,23 @@ export default function AIDocumentNavigatorPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // --- PDF.js Worker Configuration ---
-      // pdf.js requires a worker script to process PDFs off the main thread.
-      // The version of the worker MUST MATCH the version of the pdfjs-dist library installed.
-      // Your package.json specifies "pdfjs-dist": "^4.4.168".
-      // The error "The API version "4.10.38" does not match the Worker version "X.Y.Z""
-      // indicates that the installed library version (API version) is 4.10.38 on Vercel.
-      // Therefore, the workerSrc must also point to version 4.10.38.
+      // The version of the worker MUST MATCH the version of the pdfjs-dist library API.
+      // Errors like "The API version "X.Y.Z" does not match the Worker version "A.B.C""
+      // indicate a mismatch.
+      // Check your Vercel deployment logs or local browser console for the *API version* reported in such errors.
+      // Then, update the CDN URL below to use that *exact* API version for the worker.
 
-      // Option 1: Use a CDN (Current approach for broader compatibility)
-      // Match this version to the API version from the error message.
+      // Current configuration based on observed "API version 4.10.38" in Vercel:
       pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.mjs`;
+      
+      // Alternative: If API version is 4.4.168 (base of "^4.4.168" in package.json):
+      // pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.mjs`;
 
-      // Option 2: Local worker (STRONGLY RECOMMENDED FOR VERCEL & PRODUCTION for version consistency)
-      // 1. Create a 'public' folder in your project root if it doesn't exist.
-      // 2. Manually copy 'node_modules/pdfjs-dist/build/pdf.worker.mjs' to your '/public' folder.
-      //    Ensure this is done as part of your build/deployment process if versions change.
-      // 3. Uncomment the line below and comment out the CDN line above:
+      // STRONGLY RECOMMENDED FOR PRODUCTION: Local worker
+      // 1. Copy 'node_modules/pdfjs-dist/build/pdf.worker.mjs' to your '/public' folder.
+      // 2. Ensure this worker version matches the pdfjs-dist library version being used.
+      // 3. Uncomment:
       // pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
-      // This method is more robust as it ensures the worker version always matches your installed library version.
     }
   }, []);
 
@@ -113,15 +112,33 @@ export default function AIDocumentNavigatorPage() {
       } else {
         throw new Error("Failed to generate summary for the document content.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing document:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during processing.";
-      setDocumentError(errorMessage);
+      // Log the full error object structure if possible, for client-side inspection.
+      // In production, server component errors are often opaque on the client.
+      try {
+        console.error("Full error object during document processing (client-side):", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      } catch (e) {
+        console.error("Could not stringify the full error object:", e);
+      }
+
+      let detailedErrorMessage = "An unknown error occurred during processing.";
+      if (error instanceof Error) {
+        detailedErrorMessage = error.message; // This will be the generic "An error occurred..." in prod for server errors
+        // Check for the digest property, specific to Next.js server component errors
+        if (error.hasOwnProperty('digest') && typeof (error as { digest: string }).digest === 'string') {
+          const digest = (error as { digest: string }).digest;
+          detailedErrorMessage += ` (Digest: ${digest})`;
+          console.error(`Server Action Error Digest: ${digest}`);
+        }
+      }
+      
+      setDocumentError(detailedErrorMessage);
       setExtractedText(null); 
       setDocumentName(null);
       toast({
         title: "Processing Error",
-        description: errorMessage,
+        description: detailedErrorMessage,
         variant: "destructive",
       });
     } finally {
@@ -130,7 +147,7 @@ export default function AIDocumentNavigatorPage() {
   };
 
   const handleSendMessage = async (messageText: string) => {
-    if (!aiSummary) { // Chat is based on the AI summary
+    if (!aiSummary) { 
       toast({
         title: "Error",
         description: "No document summary loaded to chat about.",
@@ -151,7 +168,7 @@ export default function AIDocumentNavigatorPage() {
 
     try {
       const chatInput: ChatWithDocumentInput = {
-        documentContent: aiSummary, // Chat uses the AI-generated summary of the extracted content
+        documentContent: aiSummary, 
         userQuestion: messageText,
       };
       const chatResponse = await chatWithDocument(chatInput);
@@ -167,13 +184,26 @@ export default function AIDocumentNavigatorPage() {
       } else {
         throw new Error("AI did not provide an answer.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error chatting about document:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during chat.";
-      setChatError(errorMessage);
+       try {
+        console.error("Full error object during chat (client-side):", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      } catch (e) {
+        console.error("Could not stringify the full chat error object:", e);
+      }
+      let detailedErrorMessage = "An unknown error occurred during chat.";
+       if (error instanceof Error) {
+        detailedErrorMessage = error.message;
+        if (error.hasOwnProperty('digest') && typeof (error as { digest: string }).digest === 'string') {
+          const digest = (error as { digest: string }).digest;
+          detailedErrorMessage += ` (Digest: ${digest})`;
+           console.error(`Server Action Error Digest (Chat): ${digest}`);
+        }
+      }
+      setChatError(detailedErrorMessage);
       toast({
         title: "Chat Error",
-        description: errorMessage,
+        description: detailedErrorMessage,
         variant: "destructive",
       });
     } finally {
@@ -229,4 +259,3 @@ export default function AIDocumentNavigatorPage() {
 
   return pageContent;
 }
-
