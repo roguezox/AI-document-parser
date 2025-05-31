@@ -30,11 +30,36 @@ export async function summarizeDocument(input: SummarizeDocumentInput): Promise<
   const MAX_CONTENT_LENGTH = 50000; // Example limit, adjust as needed
   let contentToSummarize = input.documentContent;
   if (contentToSummarize.length > MAX_CONTENT_LENGTH) {
-    console.warn(`Document content length (${contentToSummarize.length}) exceeds max (${MAX_CONTENT_LENGTH}). Truncating.`);
+    console.warn(`[SERVER] Document content length (${contentToSummarize.length}) exceeds max (${MAX_CONTENT_LENGTH}). Truncating.`);
     contentToSummarize = contentToSummarize.substring(0, MAX_CONTENT_LENGTH) + "\n\n[Content truncated due to length]";
   }
 
-  return summarizeDocumentFlow({ documentContent: contentToSummarize });
+  try {
+    console.log("[SERVER] Attempting to call summarizeDocumentFlow with input content length:", contentToSummarize.length);
+    const result = await summarizeDocumentFlow({ documentContent: contentToSummarize });
+    console.log("[SERVER] summarizeDocumentFlow call successful.");
+    return result;
+  } catch (error: any) {
+    console.error("[SERVER] Critical error in summarizeDocument AI flow execution. Digest may follow this log on client.");
+    console.error("[SERVER] Error Name:", error.name);
+    if (error.message) {
+      console.error("[SERVER] Error Message:", error.message);
+    }
+    if (error.stack) {
+      console.error("[SERVER] Error Stack:", error.stack);
+    }
+    // Attempt to log more details from potential Google API errors
+    if (error.cause && typeof error.cause === 'object') {
+        console.error("[SERVER] Error Cause:", JSON.stringify(error.cause, Object.getOwnPropertyNames(error.cause)));
+    } else if (error.cause) {
+        console.error("[SERVER] Error Cause (primitive):", error.cause);
+    }
+    if (error.details) { // Some Google API errors have a 'details' field
+        console.error("[SERVER] Error Details:", error.details);
+    }
+    // Re-throw the error so it's still handled by Next.js and generates a digest for the client
+    throw error;
+  }
 }
 
 const summarizeDocumentPrompt = ai.definePrompt({

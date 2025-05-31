@@ -26,7 +26,30 @@ const ChatWithDocumentOutputSchema = z.object({
 export type ChatWithDocumentOutput = z.infer<typeof ChatWithDocumentOutputSchema>;
 
 export async function chatWithDocument(input: ChatWithDocumentInput): Promise<ChatWithDocumentOutput> {
-  return chatWithDocumentFlow(input);
+  try {
+    console.log("[SERVER] Attempting to call chatWithDocumentFlow with user question:", input.userQuestion);
+    const result = await chatWithDocumentFlow(input);
+    console.log("[SERVER] chatWithDocumentFlow call successful.");
+    return result;
+  } catch (error: any) {
+    console.error("[SERVER] Critical error in chatWithDocument AI flow execution. Digest may follow this log on client.");
+    console.error("[SERVER] Error Name:", error.name);
+    if (error.message) {
+      console.error("[SERVER] Error Message:", error.message);
+    }
+    if (error.stack) {
+      console.error("[SERVER] Error Stack:", error.stack);
+    }
+    if (error.cause && typeof error.cause === 'object') {
+        console.error("[SERVER] Error Cause:", JSON.stringify(error.cause, Object.getOwnPropertyNames(error.cause)));
+    } else if (error.cause) {
+        console.error("[SERVER] Error Cause (primitive):", error.cause);
+    }
+    if (error.details) {
+        console.error("[SERVER] Error Details:", error.details);
+    }
+    throw error;
+  }
 }
 
 const prompt = ai.definePrompt({
