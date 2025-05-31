@@ -10,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z}from 'genkit';
 
 const SummarizeDocumentInputSchema = z.object({
   documentContent: z
@@ -79,7 +79,19 @@ const summarizeDocumentFlow = ai.defineFlow(
     outputSchema: SummarizeDocumentOutputSchema,
   },
   async input => {
-    const {output} = await summarizeDocumentPrompt(input);
-    return output!;
+    if (!input.documentContent || input.documentContent.trim() === "") {
+      console.warn("[SERVER] summarizeDocumentFlow received empty documentContent after potential truncation. Returning predefined summary.");
+      return { summary: "The document content provided was empty or contained only whitespace after processing." };
+    }
+
+    const result = await summarizeDocumentPrompt(input);
+
+    if (!result.output) {
+      // Log detailed information from the result if output is missing
+      const errorDetails = `Finish reason: ${result.finishReason}, Status: ${result.status} - ${result.statusText}. Candidates: ${JSON.stringify(result.candidates)}`;
+      console.error(`[SERVER] summarizeDocumentPrompt did not return a valid output matching the schema. ${errorDetails}`);
+      throw new Error(`AI failed to generate a summary in the expected format or due to model policy. Details: ${result.statusText || result.finishReason}`);
+    }
+    return result.output;
   }
 );

@@ -10,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z}from 'genkit';
 
 const ChatWithDocumentInputSchema = z.object({
   documentContent: z
@@ -74,7 +74,23 @@ const chatWithDocumentFlow = ai.defineFlow(
     outputSchema: ChatWithDocumentOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    if (!input.documentContent || input.documentContent.trim() === "") {
+      console.warn("[SERVER] chatWithDocumentFlow received empty documentContent (summary). Returning canned response.");
+      return { answer: "I cannot answer questions as there is no document summary available." };
+    }
+    if (!input.userQuestion || input.userQuestion.trim() === "") {
+      console.warn("[SERVER] chatWithDocumentFlow received empty userQuestion. Returning canned response.");
+      return { answer: "Please provide a question." };
+    }
+    
+    const result = await prompt(input);
+
+    if (!result.output) {
+      // Log detailed information from the result if output is missing
+      const errorDetails = `Finish reason: ${result.finishReason}, Status: ${result.status} - ${result.statusText}. Candidates: ${JSON.stringify(result.candidates)}`;
+      console.error(`[SERVER] chatWithDocumentPrompt did not return a valid output. ${errorDetails}`);
+      throw new Error(`AI failed to provide an answer in the expected format or due to model policy. Details: ${result.statusText || result.finishReason}`);
+    }
+    return result.output;
   }
 );
