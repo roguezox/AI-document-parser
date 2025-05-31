@@ -33,23 +33,19 @@ export default function AIDocumentNavigatorPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // --- PDF.js Worker Configuration ---
-      // The version of the worker MUST MATCH the version of the pdfjs-dist library API.
-      // Errors like "The API version "X.Y.Z" does not match the Worker version "A.B.C""
-      // indicate a mismatch.
-      // Check your Vercel deployment logs or local browser console for the *API version* reported in such errors.
-      // Then, update the CDN URL below to use that *exact* API version for the worker.
-
-      // Current configuration based on observed "API version 4.10.38" in Vercel:
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.mjs`;
-      
-      // Alternative: If API version is 4.4.168 (base of "^4.4.168" in package.json):
-      // pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.mjs`;
-
       // STRONGLY RECOMMENDED FOR PRODUCTION: Local worker
-      // 1. Copy 'node_modules/pdfjs-dist/build/pdf.worker.mjs' to your '/public' folder.
-      // 2. Ensure this worker version matches the pdfjs-dist library version being used.
-      // 3. Uncomment:
-      // pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+      // 1. Ensure you have copied 'node_modules/pdfjs-dist/build/pdf.worker.mjs' 
+      //    to your '/public' folder and committed it.
+      // 2. This setup ensures the worker version matches the library version.
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+
+      // --- Deprecated CDN Configurations (kept for reference, but local worker is preferred) ---
+      // If you were to use a CDN, you'd need to ensure the version matches EXACTLY
+      // the version of pdfjs-dist resolved by your package manager.
+      // Example for version 4.10.38 (if that's what `npm list pdfjs-dist` shows):
+      // pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.mjs`;
+      // Example for version 4.4.168 (if that's what `npm list pdfjs-dist` shows):
+      // pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.mjs`;
     }
   }, []);
 
@@ -114,8 +110,6 @@ export default function AIDocumentNavigatorPage() {
       }
     } catch (error: any) {
       console.error("Error processing document:", error);
-      // Log the full error object structure if possible, for client-side inspection.
-      // In production, server component errors are often opaque on the client.
       try {
         console.error("Full error object during document processing (client-side):", JSON.stringify(error, Object.getOwnPropertyNames(error)));
       } catch (e) {
@@ -124,8 +118,7 @@ export default function AIDocumentNavigatorPage() {
 
       let detailedErrorMessage = "An unknown error occurred during processing.";
       if (error instanceof Error) {
-        detailedErrorMessage = error.message; // This will be the generic "An error occurred..." in prod for server errors
-        // Check for the digest property, specific to Next.js server component errors
+        detailedErrorMessage = error.message;
         if (error.hasOwnProperty('digest') && typeof (error as { digest: string }).digest === 'string') {
           const digest = (error as { digest: string }).digest;
           detailedErrorMessage += ` (Digest: ${digest})`;
